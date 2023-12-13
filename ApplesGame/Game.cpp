@@ -14,32 +14,32 @@ namespace AppleGame
 
 		assert(game.font.loadFromFile(RESOURCES_PATH + "\\Fonts\\WaybulooArial-Bold.ttf"));
 
-		initPlayer(game.player, game);
+		InitPlayer(game.player, game);
 
-		srand(time(0));
+		srand((unsigned int)time(NULL));
 
-		int start = 10;
-		int end = 30;
+		const int start = 10;
+		const int end = 30;
 
 		game.applesCount = rand() % (end - start + 1) + start;
 
-		game.apples = new Apple [game.applesCount];
+		game.apples = new Apple[game.applesCount];
 
 		// Init apples
 		for (int i = 0; i < game.applesCount; ++i)
 		{
-			initApple(game.apples[i], game);
+			InitApple(game.apples[i], game);
 		}
 
 		// Init rocks
 		for (int i = 0; i < NUM_ROCKS; ++i)
 		{
-			initRock(game.rocks[i], game);
+			InitRock(game.rocks[i], game);
 		}
 
-		InitGameText(game);
-
 		InitMenuText(game);
+
+		InitGameText(game);
 
 		game.background.setSize(sf::Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT));
 		game.background.setFillColor(sf::Color::Black);
@@ -101,9 +101,9 @@ namespace AppleGame
 			DrawApple(game.apples[i], window);
 		}
 
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (Rock rock: game.rocks)
 		{
-			DrawRock(game.rocks[i], window);
+			DrawRock(rock, window);
 		}
 
 		DrawGameText(game, window);
@@ -147,10 +147,10 @@ namespace AppleGame
 
 	void InitMenuText(Game& game)
 	{
-		for (int i = 0; i < 3; ++i)
+		for (sf::Text text: game.menuText)
 		{
-			game.menuText[i].setFont(game.font);
-			game.menuText[i].setCharacterSize(20);
+			text.setFont(game.font);
+			text.setCharacterSize(20);
 		}
 
 		for (int i = 0; i < 3; ++i)
@@ -198,9 +198,9 @@ namespace AppleGame
 		game.menuText[0].setString("Acceleration Press \"1\": " + acceleration);
 		game.menuText[1].setString("Endless apples Press \"2\": " + endlessAppales);
 
-		for (size_t i = 0; i < 3; i++)
+		for (const sf::Text text : game.menuText)
 		{
-			window.draw(game.menuText[i]);
+			window.draw(text);
 		}
 	}
 
@@ -225,9 +225,9 @@ namespace AppleGame
 		}
 
 		// Reset rocks
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (Rock rock: game.rocks)
 		{
-			game.rocks[i].rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
+			rock.rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 		}
 
 		// Reset game state
@@ -271,10 +271,10 @@ namespace AppleGame
 	{
 		Player& player = game.player;
 
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (const Rock rock : game.rocks)
 		{
 			if (IsRectanglesCollide(player.playerPosition, { PLAYER_SIZE, PLAYER_SIZE },
-				game.rocks[i].rocksPositions, { ROCK_SIZE, ROCK_SIZE }))
+				rock.rocksPositions, { ROCK_SIZE, ROCK_SIZE }))
 			{
 				game.isGameFinished = true;
 				game.timeSinceGameFinish = 0.f;
@@ -296,17 +296,33 @@ namespace AppleGame
 
 	void SetGameOptions(Game& game)
 	{
-		
+
 		// Set acceleration
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
 		{
-			game.settings = game.settings ^ 1 << 0;
+			if (!game.accelerationChanged)
+			{
+				game.settings = game.settings ^ 1 << 0;
+				game.accelerationChanged = true;
+			}
+		}
+		else
+		{
+			game.accelerationChanged = false;
 		}
 
 		// Set endless apples
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
 		{
-			game.settings = game.settings ^ 1 << 1;
+			if (!game.endlessApplesChange)
+			{
+				game.settings = game.settings ^ 1 << 1;
+				game.endlessApplesChange = true;
+			}
+		}
+		else
+		{
+			game.endlessApplesChange = false;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))

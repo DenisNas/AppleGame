@@ -5,15 +5,15 @@
 
 namespace AppleGame
 {
+	struct Game;
+
 	struct Apple
 	{
 		Position2D applesPositions;
 		sf::Sprite sprite;
-		bool isEaten;
+		bool isEaten = false;
 	};
 
-	struct Game;
-
-	void initApple(Apple& apple, const Game& game);
+	void InitApple(Apple& apple, const Game& game);
 	void DrawApple(Apple& apple, sf::RenderWindow& window);
 }
