@@ -28,6 +28,8 @@ namespace AppleGame
 		int numEatenApples = 0;
 		bool isGameFinished = false;
 		bool isStarted = false;
+		bool accelerationChanged = false;
+		bool endlessApplesChange = false;
 		float timeSinceGameFinish = 0.f;
 		sf::RectangleShape background;
 

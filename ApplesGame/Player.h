@@ -24,7 +24,7 @@ namespace AppleGame
 
 	struct Game;
 
-	void initPlayer(Player& player, const Game& game);
+	void InitPlayer(Player& player, const Game& game);
 	void DrawPlayer(Player& player, sf::RenderWindow& window);
 	void TurnAround(Player& player);
 	void ChangeDirection(Player& player);

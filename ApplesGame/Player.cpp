@@ -4,7 +4,7 @@
 
 namespace AppleGame
 {
-	void initPlayer(Player& player, const Game& game)
+	void InitPlayer(Player& player, const Game& game)
 	{
 		// Init player state
 		player.playerPosition = { SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f };
