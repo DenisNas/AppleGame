@@ -16,12 +16,12 @@ namespace AppleGame
 
 		InitPlayer(game.player, game);
 
-		srand((unsigned int)time(NULL));
-
 		const int start = 10;
 		const int end = 30;
 
-		game.applesCount = rand() % (end - start + 1) + start;
+		srand((unsigned int)time(NULL));
+
+		game.applesCount = GetRandomNumber(start, end);
 
 		game.apples = new Apple[game.applesCount];
 
@@ -37,9 +37,11 @@ namespace AppleGame
 			InitRock(game.rocks[i], game);
 		}
 
+		InitGameText(game);
+
 		InitMenuText(game);
 
-		InitGameText(game);
+		InitScoreTable(game);
 
 		game.background.setSize(sf::Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT));
 		game.background.setFillColor(sf::Color::Black);
@@ -121,8 +123,8 @@ namespace AppleGame
 	void InitGameText(Game& game)
 	{
 		// Init score text
-		game.scoreText.setFont(game.font);
-		game.scoreText.setCharacterSize(20);
+		game.appleScoreText.setFont(game.font);
+		game.appleScoreText.setCharacterSize(20);
 
 		// Init controll text
 		game.controlText.setFont(game.font);
@@ -142,12 +144,12 @@ namespace AppleGame
 		sf::FloatRect gameOverRect = game.gameOverText.getLocalBounds();
 		game.gameOverText.setOrigin(gameOverRect.width * 0.5f, gameOverRect.height * 0.5f);
 
-		game.gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
+		game.gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f - 50);
 	}
 
 	void InitMenuText(Game& game)
 	{
-		for (sf::Text text: game.menuText)
+		for (sf::Text& text : game.menuText)
 		{
 			text.setFont(game.font);
 			text.setCharacterSize(20);
@@ -165,14 +167,15 @@ namespace AppleGame
 
 	void DrawGameText(Game& game, sf::RenderWindow& window)
 	{
-		game.scoreText.setString("Eaten apples: " + std::to_string(game.numEatenApples));
-		window.draw(game.scoreText);
+		game.appleScoreText.setString("Eaten apples: " + std::to_string(game.numEatenApples));
+		window.draw(game.appleScoreText);
 
 		window.draw(game.controlText);
 
 		if (game.isGameFinished)
 		{
 			window.draw(game.gameOverText);
+			DrawScoreTable(game, window);
 		}
 	}
 
@@ -225,7 +228,7 @@ namespace AppleGame
 		}
 
 		// Reset rocks
-		for (Rock rock: game.rocks)
+		for (Rock& rock: game.rocks)
 		{
 			rock.rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 		}
@@ -291,6 +294,7 @@ namespace AppleGame
 
 		if (game.isGameFinished) {
 			game.deathSound.play();
+			SaveResultPlayerScore(game);
 		}
 	}
 

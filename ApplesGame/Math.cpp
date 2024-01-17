@@ -40,4 +40,8 @@ namespace AppleGame
 		sprite.setOrigin(spriteRect.width * originX, spriteRect.height * originY);
 
 	}
+	int GetRandomNumber(const int start, const int end)
+	{
+		return rand() % (end - start + 1) + start;
+	}
 }	 

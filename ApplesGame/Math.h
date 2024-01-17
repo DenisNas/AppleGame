@@ -25,4 +25,6 @@ namespace AppleGame
 
 	void SetSpriteSize(sf::Sprite& sprite, float desiredWidth, float desiredHeight);
 	void SetSpriteOrigin(sf::Sprite& sprite, float originX, float originY);
+
+	int GetRandomNumber(const int start, const int end);
 }
