@@ -3,7 +3,7 @@
 
 namespace AppleGame
 {
-	void initRock(Rock& rock, const Game& game)
+	void InitRock(Rock& rock, const Game& game)
 	{
 		rock.rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 

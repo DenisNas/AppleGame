@@ -14,32 +14,34 @@ namespace AppleGame
 
 		assert(game.font.loadFromFile(RESOURCES_PATH + "\\Fonts\\WaybulooArial-Bold.ttf"));
 
-		initPlayer(game.player, game);
+		InitPlayer(game.player, game);
 
-		srand(time(0));
+		const int start = 10;
+		const int end = 30;
 
-		int start = 10;
-		int end = 30;
+		srand((unsigned int)time(NULL));
 
-		game.applesCount = rand() % (end - start + 1) + start;
+		game.applesCount = GetRandomNumber(start, end);
 
-		game.apples = new Apple [game.applesCount];
+		game.apples = new Apple[game.applesCount];
 
 		// Init apples
 		for (int i = 0; i < game.applesCount; ++i)
 		{
-			initApple(game.apples[i], game);
+			InitApple(game.apples[i], game);
 		}
 
 		// Init rocks
 		for (int i = 0; i < NUM_ROCKS; ++i)
 		{
-			initRock(game.rocks[i], game);
+			InitRock(game.rocks[i], game);
 		}
 
 		InitGameText(game);
 
 		InitMenuText(game);
+
+		InitScoreTable(game);
 
 		game.background.setSize(sf::Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT));
 		game.background.setFillColor(sf::Color::Black);
@@ -101,9 +103,9 @@ namespace AppleGame
 			DrawApple(game.apples[i], window);
 		}
 
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (Rock rock: game.rocks)
 		{
-			DrawRock(game.rocks[i], window);
+			DrawRock(rock, window);
 		}
 
 		DrawGameText(game, window);
@@ -121,8 +123,8 @@ namespace AppleGame
 	void InitGameText(Game& game)
 	{
 		// Init score text
-		game.scoreText.setFont(game.font);
-		game.scoreText.setCharacterSize(20);
+		game.appleScoreText.setFont(game.font);
+		game.appleScoreText.setCharacterSize(20);
 
 		// Init controll text
 		game.controlText.setFont(game.font);
@@ -142,15 +144,15 @@ namespace AppleGame
 		sf::FloatRect gameOverRect = game.gameOverText.getLocalBounds();
 		game.gameOverText.setOrigin(gameOverRect.width * 0.5f, gameOverRect.height * 0.5f);
 
-		game.gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
+		game.gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f - 50);
 	}
 
 	void InitMenuText(Game& game)
 	{
-		for (int i = 0; i < 3; ++i)
+		for (sf::Text& text : game.menuText)
 		{
-			game.menuText[i].setFont(game.font);
-			game.menuText[i].setCharacterSize(20);
+			text.setFont(game.font);
+			text.setCharacterSize(20);
 		}
 
 		for (int i = 0; i < 3; ++i)
@@ -165,14 +167,15 @@ namespace AppleGame
 
 	void DrawGameText(Game& game, sf::RenderWindow& window)
 	{
-		game.scoreText.setString("Eaten apples: " + std::to_string(game.numEatenApples));
-		window.draw(game.scoreText);
+		game.appleScoreText.setString("Eaten apples: " + std::to_string(game.numEatenApples));
+		window.draw(game.appleScoreText);
 
 		window.draw(game.controlText);
 
 		if (game.isGameFinished)
 		{
 			window.draw(game.gameOverText);
+			DrawScoreTable(game, window);
 		}
 	}
 
@@ -198,9 +201,9 @@ namespace AppleGame
 		game.menuText[0].setString("Acceleration Press \"1\": " + acceleration);
 		game.menuText[1].setString("Endless apples Press \"2\": " + endlessAppales);
 
-		for (size_t i = 0; i < 3; i++)
+		for (const sf::Text text : game.menuText)
 		{
-			window.draw(game.menuText[i]);
+			window.draw(text);
 		}
 	}
 
@@ -225,9 +228,9 @@ namespace AppleGame
 		}
 
 		// Reset rocks
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (Rock& rock: game.rocks)
 		{
-			game.rocks[i].rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
+			rock.rocksPositions = GetRandomPositionInScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 		}
 
 		// Reset game state
@@ -271,10 +274,10 @@ namespace AppleGame
 	{
 		Player& player = game.player;
 
-		for (int i = 0; i < NUM_ROCKS; ++i)
+		for (const Rock rock : game.rocks)
 		{
 			if (IsRectanglesCollide(player.playerPosition, { PLAYER_SIZE, PLAYER_SIZE },
-				game.rocks[i].rocksPositions, { ROCK_SIZE, ROCK_SIZE }))
+				rock.rocksPositions, { ROCK_SIZE, ROCK_SIZE }))
 			{
 				game.isGameFinished = true;
 				game.timeSinceGameFinish = 0.f;
@@ -291,22 +294,39 @@ namespace AppleGame
 
 		if (game.isGameFinished) {
 			game.deathSound.play();
+			SaveResultPlayerScore(game);
 		}
 	}
 
 	void SetGameOptions(Game& game)
 	{
-		
+
 		// Set acceleration
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
 		{
-			game.settings = game.settings ^ 1 << 0;
+			if (!game.accelerationChanged)
+			{
+				game.settings = game.settings ^ 1 << 0;
+				game.accelerationChanged = true;
+			}
+		}
+		else
+		{
+			game.accelerationChanged = false;
 		}
 
 		// Set endless apples
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
 		{
-			game.settings = game.settings ^ 1 << 1;
+			if (!game.endlessApplesChange)
+			{
+				game.settings = game.settings ^ 1 << 1;
+				game.endlessApplesChange = true;
+			}
+		}
+		else
+		{
+			game.endlessApplesChange = false;
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))

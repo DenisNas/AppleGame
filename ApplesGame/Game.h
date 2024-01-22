@@ -4,6 +4,7 @@
 #include "Apple.h"
 #include "Rock.h"
 #include "Constants.h"
+#include "Score.h"
 
 //test comment
 
@@ -19,6 +20,9 @@ namespace AppleGame
 		// Rocks data
 		Rock rocks[NUM_ROCKS];
 
+		// Score table data
+		Score scoreTable[NUM_SCORE];
+
 		// Game mode selection 
 		// 0 bit = on\off acceleration
 		// 1 bit = on\off endless apples
@@ -28,6 +32,8 @@ namespace AppleGame
 		int numEatenApples = 0;
 		bool isGameFinished = false;
 		bool isStarted = false;
+		bool accelerationChanged = false;
+		bool endlessApplesChange = false;
 		float timeSinceGameFinish = 0.f;
 		sf::RectangleShape background;
 
@@ -45,11 +51,12 @@ namespace AppleGame
 
 		// Text
 		sf::Font font;
-		sf::Text scoreText;
+		sf::Text appleScoreText;
 		sf::Text controlText;
 		sf::Text gameOverText;
 
 		sf::Text menuText[3];
+		sf::Text resultScoreText[NUM_SCORE];
 
 	};
 
