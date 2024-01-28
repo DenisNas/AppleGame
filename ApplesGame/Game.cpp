@@ -23,17 +23,21 @@ namespace AppleGame
 
 		game.applesCount = GetRandomNumber(start, end);
 
-		game.apples = new Apple[game.applesCount];
+		game.apples.reserve(game.applesCount);
 
 		// Init apples
 		for (int i = 0; i < game.applesCount; ++i)
 		{
+			game.apples.push_back(Apple{});
 			InitApple(game.apples[i], game);
 		}
+
+		game.rocks.reserve(NUM_ROCKS);
 
 		// Init rocks
 		for (int i = 0; i < NUM_ROCKS; ++i)
 		{
+			game.rocks.push_back(Rock{});
 			InitRock(game.rocks[i], game);
 		}
 
@@ -149,14 +153,16 @@ namespace AppleGame
 
 	void InitMenuText(Game& game)
 	{
-		for (sf::Text& text : game.menuText)
-		{
-			text.setFont(game.font);
-			text.setCharacterSize(20);
-		}
+
+		game.menuText.reserve(3);
 
 		for (int i = 0; i < 3; ++i)
 		{
+			game.menuText.push_back(sf::Text{});
+
+			game.menuText[i].setFont(game.font);
+			game.menuText[i].setCharacterSize(20);
+
 			sf::FloatRect controlRect = game.controlText.getLocalBounds();
 			game.menuText[i].setOrigin(controlRect.width * 0.5f, controlRect.height * 0.5f);
 			game.menuText[i].setPosition(SCREEN_WIDTH / 2.f, (SCREEN_HEIGHT / 2 - 30) + i * 30.f);
@@ -337,6 +343,6 @@ namespace AppleGame
 
 	void DeinializeGame(Game& game)
 	{
-		delete[] game.apples;
+		
 	}
 }

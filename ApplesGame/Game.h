@@ -15,13 +15,10 @@ namespace AppleGame
 		Player player;
 
 		// Apples data
-		Apple *apples;
+		std::vector<Apple> apples;
 
 		// Rocks data
-		Rock rocks[NUM_ROCKS];
-
-		// Score table data
-		Score scoreTable[NUM_SCORE];
+		std::vector<Rock> rocks;
 
 		// Game mode selection 
 		// 0 bit = on\off acceleration
@@ -55,8 +52,10 @@ namespace AppleGame
 		sf::Text controlText;
 		sf::Text gameOverText;
 
-		sf::Text menuText[3];
-		sf::Text resultScoreText[NUM_SCORE];
+		std::vector<sf::Text> menuText;
+
+		// Score table data
+		std::vector<sf::Text> resultScoreText;
 
 	};
 

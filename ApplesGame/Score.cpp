@@ -6,16 +6,16 @@ namespace AppleGame
 	void InitScoreTable(Game& game)
 	{
 
-		for (sf::Text& text : game.resultScoreText)
-		{
-
-			text.setFont(game.font);
-			text.setCharacterSize(20);
-			text.setFillColor(sf::Color::Black);
-		}
+		game.resultScoreText.reserve(NUM_SCORE);
 
 		for (int i = 0; i < NUM_SCORE; ++i)
 		{
+			game.resultScoreText.push_back(sf::Text{});
+
+			game.resultScoreText[i].setFont(game.font);
+			game.resultScoreText[i].setCharacterSize(20);
+			game.resultScoreText[i].setFillColor(sf::Color::Black);
+
 			game.resultScoreText[i].setString("Player" + std::to_string(i + 1) + ": " + std::to_string(GetRandomNumber(0, 1000)));
 			sf::FloatRect controlRect = game.resultScoreText[i].getLocalBounds();
 			game.resultScoreText[i].setOrigin(controlRect.width * 0.5f, controlRect.height * 0.5f);
