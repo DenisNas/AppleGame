@@ -1,5 +1,6 @@
 ﻿#include "Game.h"
 #include <cassert>
+#include "GameMenu.h"
 
 namespace AppleGame
 {
@@ -43,9 +44,11 @@ namespace AppleGame
 
 		InitGameText(game);
 
-		InitMenuText(game);
+		InitStartMenuText(game);
 
 		InitScoreTable(game);
+
+		InitGameMenu(game);
 
 		game.background.setSize(sf::Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT));
 		game.background.setFillColor(sf::Color::Black);
@@ -56,9 +59,10 @@ namespace AppleGame
 		game.deathSound.setBuffer(game.deathSoundBuffer);
 
 		game.numEatenApples = 0;
-		game.isGameFinished = false;
+		//game.isGameFinished = false;
 		game.timeSinceGameFinish = 0;
-
+		
+		PushGameState(game, GameState::StartMenu);
 	}
 
 	void UpdateGame(Game& game, float deltaTime)
@@ -67,7 +71,7 @@ namespace AppleGame
 		Player& player = game.player;
 
 		// Update game state
-		if (!game.isGameFinished)
+		if (game.gameStateStack.back() == GameState::Playing)
 		{
 			// Handle input
 			ChangeDirection(player);
@@ -81,7 +85,7 @@ namespace AppleGame
 			// Find player collisions with rocks
 			CheckCollisionsWithRockOrBorder(game);
 		}
-		else
+		else if(game.gameStateStack.back() == GameState::Finished)
 		{
 			if (game.timeSinceGameFinish <= PAUSE_LENGTH)
 			{
@@ -116,11 +120,11 @@ namespace AppleGame
 
 	}
 
-	void DrawMenu(Game& game, sf::RenderWindow& window)
+	void DrawStartMenu(Game& game, sf::RenderWindow& window)
 	{
 		window.draw(game.background);
 
-		DrawMenuText(game, window);
+		DrawStartMenuText(game, window);
 
 	}
 
@@ -149,26 +153,36 @@ namespace AppleGame
 		game.gameOverText.setOrigin(gameOverRect.width * 0.5f, gameOverRect.height * 0.5f);
 
 		game.gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f - 50);
+
+		game.EscapeText.setString("Are you sure? Type y/n");
+		game.EscapeText.setFont(game.font);
+		game.EscapeText.setCharacterSize(40);
+		game.EscapeText.setFillColor(sf::Color::White);
+
+		sf::FloatRect escapeRect = game.EscapeText.getLocalBounds();
+		game.EscapeText.setOrigin(escapeRect.width * 0.5f, escapeRect.height * 0.5f);
+
+		game.EscapeText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f - 50);
 	}
 
-	void InitMenuText(Game& game)
+	void InitStartMenuText(Game& game)
 	{
 
-		game.menuText.reserve(3);
+		game.startMenuText.reserve(3);
 
 		for (int i = 0; i < 3; ++i)
 		{
-			game.menuText.push_back(sf::Text{});
+			game.startMenuText.push_back(sf::Text{});
 
-			game.menuText[i].setFont(game.font);
-			game.menuText[i].setCharacterSize(20);
+			game.startMenuText[i].setFont(game.font);
+			game.startMenuText[i].setCharacterSize(20);
 
 			sf::FloatRect controlRect = game.controlText.getLocalBounds();
-			game.menuText[i].setOrigin(controlRect.width * 0.5f, controlRect.height * 0.5f);
-			game.menuText[i].setPosition(SCREEN_WIDTH / 2.f, (SCREEN_HEIGHT / 2 - 30) + i * 30.f);
+			game.startMenuText[i].setOrigin(controlRect.width * 0.5f, controlRect.height * 0.5f);
+			game.startMenuText[i].setPosition(SCREEN_WIDTH / 2.f, (SCREEN_HEIGHT / 2 - 30) + i * 30.f);
 		}
 
-		game.menuText[2].setString("Press Enter to start");
+		game.startMenuText[2].setString("Press Enter to start");
 	}
 
 	void DrawGameText(Game& game, sf::RenderWindow& window)
@@ -178,14 +192,14 @@ namespace AppleGame
 
 		window.draw(game.controlText);
 
-		if (game.isGameFinished)
+		if (game.gameStateStack.back() == GameState::Finished)
 		{
 			window.draw(game.gameOverText);
 			DrawScoreTable(game, window);
 		}
 	}
 
-	void DrawMenuText(Game& game, sf::RenderWindow& window)
+	void DrawStartMenuText(Game& game, sf::RenderWindow& window)
 	{
 		std::string acceleration;
 		std::string endlessAppales;
@@ -204,10 +218,10 @@ namespace AppleGame
 			endlessAppales = "off";
 		}
 
-		game.menuText[0].setString("Acceleration Press \"1\": " + acceleration);
-		game.menuText[1].setString("Endless apples Press \"2\": " + endlessAppales);
+		game.startMenuText[0].setString("Acceleration Press \"1\": " + acceleration);
+		game.startMenuText[1].setString("Endless apples Press \"2\": " + endlessAppales);
 
-		for (const sf::Text text : game.menuText)
+		for (const sf::Text text : game.startMenuText)
 		{
 			window.draw(text);
 		}
@@ -241,8 +255,9 @@ namespace AppleGame
 
 		// Reset game state
 		game.numEatenApples = 0;
-		game.isGameFinished = false;
+		game.gameStateStack.clear();
 		game.timeSinceGameFinish = 0.f;
+		PushGameState(game, GameState::Playing);
 	}
 
 	void UpdateEatenAppes(Game& game)
@@ -285,7 +300,7 @@ namespace AppleGame
 			if (IsRectanglesCollide(player.playerPosition, { PLAYER_SIZE, PLAYER_SIZE },
 				rock.rocksPositions, { ROCK_SIZE, ROCK_SIZE }))
 			{
-				game.isGameFinished = true;
+				PushGameState(game, GameState::Finished);
 				game.timeSinceGameFinish = 0.f;
 			}
 		}
@@ -294,11 +309,11 @@ namespace AppleGame
 		if (player.playerPosition.x - PLAYER_SIZE / 2.f < 0.f || player.playerPosition.x + PLAYER_SIZE / 2.f > SCREEN_WIDTH ||
 			player.playerPosition.y - PLAYER_SIZE / 2.f < 0.f || player.playerPosition.y + PLAYER_SIZE / 2.f > SCREEN_HEIGHT)
 		{
-			game.isGameFinished = true;
+			PushGameState(game, GameState::Finished);
 			game.timeSinceGameFinish = 0.f;
 		}
 
-		if (game.isGameFinished) {
+		if (game.gameStateStack.back() == GameState::Finished) {
 			game.deathSound.play();
 			SaveResultPlayerScore(game);
 		}
@@ -337,12 +352,28 @@ namespace AppleGame
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
 		{
-			game.isStarted = true;
+			PushGameState(game, GameState::Playing);
 		}
 	}
 
 	void DeinializeGame(Game& game)
 	{
 		
+	}
+	void PushGameState(Game& game, GameState gamestate)
+	{
+		game.gameStateStack.push_back(gamestate);
+	}
+	void PopGameState(Game& game)
+	{
+		game.gameStateStack.pop_back();
+	}
+	void SwitchGameState(Game& game, GameState newState)
+	{
+		std::vector<GameState> stack = game.gameStateStack;
+		GameState oldState = stack.back();
+
+		stack.pop_back();
+		stack.push_back(newState);
 	}
 }

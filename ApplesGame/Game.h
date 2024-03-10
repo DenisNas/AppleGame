@@ -5,11 +5,24 @@
 #include "Rock.h"
 #include "Constants.h"
 #include "Score.h"
+#include "GameMenu.h"
 
 //test comment
 
 namespace AppleGame
 {
+
+	enum GameState
+	{
+		None = 0,
+		StartMenu,
+		ScoreTable,
+		Playing,
+		Finished,
+		GMenu,
+		Exit
+	};
+
 	struct Game
 	{
 		Player player;
@@ -20,6 +33,9 @@ namespace AppleGame
 		// Rocks data
 		std::vector<Rock> rocks;
 
+		//game menu
+		GameMenu gameMenu;
+
 		// Game mode selection 
 		// 0 bit = on\off acceleration
 		// 1 bit = on\off endless apples
@@ -27,8 +43,11 @@ namespace AppleGame
 		// Global game data
 		int applesCount;
 		int numEatenApples = 0;
-		bool isGameFinished = false;
-		bool isStarted = false;
+
+		std::vector<GameState> gameStateStack;
+
+		/*bool isGameFinished = false;
+		bool isStarted = false;*/
 		bool accelerationChanged = false;
 		bool endlessApplesChange = false;
 		float timeSinceGameFinish = 0.f;
@@ -51,9 +70,10 @@ namespace AppleGame
 		sf::Text appleScoreText;
 		sf::Text controlText;
 		sf::Text gameOverText;
+		sf::Text EscapeText;
 
-		std::vector<sf::Text> menuText;
-
+		std::vector<sf::Text> startMenuText;
+		
 		// Score table data
 		std::vector<sf::Text> resultScoreText;
 
@@ -63,7 +83,9 @@ namespace AppleGame
 	
 	void InitGameText(Game& game);
 
-	void InitMenuText(Game& game);
+	void InitStartMenuText(Game& game);
+
+	
 	
 	void UpdateGame(Game& game, float deltaTime);
 
@@ -75,14 +97,24 @@ namespace AppleGame
 
 	void DrawGame(Game& game, sf::RenderWindow& window);
 
-	void DrawMenu(Game& game, sf::RenderWindow& window);
+	void DrawStartMenu(Game& game, sf::RenderWindow& window);
+
+
 
 	void DrawGameText(Game& game, sf::RenderWindow& window);
 
-	void DrawMenuText(Game& game, sf::RenderWindow& window);
+	void DrawStartMenuText(Game& game, sf::RenderWindow& window);
+
+
 
 	void ResetGame(Game& game);
 
 	void DeinializeGame(Game& game);
+
+	void PushGameState(Game& game, GameState gamestate);
+	
+	void PopGameState(Game& game);
+
+	void SwitchGameState(Game& game, GameState newState);
 
 }

@@ -14,7 +14,7 @@ namespace AppleGame
 
 			game.resultScoreText[i].setFont(game.font);
 			game.resultScoreText[i].setCharacterSize(20);
-			game.resultScoreText[i].setFillColor(sf::Color::Black);
+			game.resultScoreText[i].setFillColor(sf::Color::White);
 
 			game.resultScoreText[i].setString("Player" + std::to_string(i + 1) + ": " + std::to_string(GetRandomNumber(0, 1000)));
 			sf::FloatRect controlRect = game.resultScoreText[i].getLocalBounds();

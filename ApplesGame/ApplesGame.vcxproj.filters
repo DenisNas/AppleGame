@@ -28,6 +28,9 @@
     <ClCompile Include="Score.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="GameMenu.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -49,6 +52,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Score.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMenu.h">
       <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>
